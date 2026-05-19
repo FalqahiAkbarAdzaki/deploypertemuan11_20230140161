@@ -18,7 +18,7 @@ public class Profile {
     private String nama;
     private String nama;
     private String alamat;
-    @OnetoOne
+    @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }
