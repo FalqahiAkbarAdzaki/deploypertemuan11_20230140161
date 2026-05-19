@@ -1,6 +1,5 @@
 package com.example.pertemuan11.security;
 
-
 import com.example.pertemuan11.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,5 +25,42 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
 
+        return username -> {
+
+            com.example.pertemuan11.model.User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User tidak ditemukan"));
+
+            return User
+                    .withUsername(user.getUsername())
+                    .password(user.getPassword())
+                    .authorities("USER")
+                    .build();
+        };
+    }
+
+    @Bean
+    public  SecurityFilterChain securityFilterChain(HttpSecurity http)
+        throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                        "/register",
+                        "/login",
+                        "/css/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+        )
+
+        .formLogin (login -> login
+                .loginPage("/login")
+                .defaultSuccessUrl("/home", true)
+                .permitAll()
+        )
+
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login")
+                );
+            return http.build();
     }
 }
